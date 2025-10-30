@@ -1,0 +1,16 @@
+{
+  "name": "remotion-project",
+  "private": true,
+  "version": "0.0.1",
+  "scripts": {
+    "preview": "remotion preview src/index.jsx",
+    "render": "remotion render src/index.jsx --overwrite",
+    "render:mp4": "remotion render src/index.jsx --codec=h264 --overwrite"
+  },
+  "dependencies": {
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "remotion": "^4.0.0",
+    "@remotion/cli": "^4.0.0"
+  }
+}

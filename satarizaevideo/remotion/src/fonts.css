@@ -1,0 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Sansation:wght@300;400;700&display=swap');
+
+@font-face {
+  font-family: 'Product Sans';
+  src: url('../public/fonts/product-sans/ProductSans-Regular.woff2') format('woff2'),
+       url('../public/fonts/product-sans/ProductSans-Regular.woff') format('woff');
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Product Sans Bold';
+  src: url('../public/fonts/product-sans/ProductSans-Bold.woff2') format('woff2'),
+       url('../public/fonts/product-sans/ProductSans-Bold.woff') format('woff');
+  font-weight: 700; font-style: normal; font-display: swap;
+}
+
+
