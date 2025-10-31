@@ -393,6 +393,15 @@ export const Video = ({ listingId, variant = 'bireysel' }) => {
     const asansorVal = val(asansorAttr);
     const cepheAttr = getAttrAny(['Cephe']);
     const cepheText = val(cepheAttr);
+    const cepheDisplay = (() => {
+      const s = (cepheText == null ? '' : String(cepheText)).trim();
+      if (!s) return s;
+      // If value already includes "Cephe/Cephesi", normalize to "Cephesi"; else append " Cephesi"
+      if (/\bcephe(i)?\b/i.test(s)) {
+        return s.replace(/\bcephe(i)?\b/gi, 'Cephesi');
+      }
+      return `${s} Cephesi`;
+    })();
     const otoparkAttr = getAttrAny(['Otopark']);
     const otoparkVal = val(otoparkAttr);
     const tapuAttr = getAttrAny(['Tapu', 'Tapu Durumu']);
@@ -425,7 +434,7 @@ export const Video = ({ listingId, variant = 'bireysel' }) => {
     const detailsForHousing = [
       isitmaText,
       mutfakText,
-      truthy(asansorVal) ? 'Asansörlü' : (cepheText || katPositionText),
+      truthy(asansorVal) ? 'Asansörlü' : (cepheDisplay || katPositionText),
       truthy(otoparkVal) ? 'Otopark Mevcut' : tapuText,
     ].filter(Boolean);
 
@@ -646,7 +655,8 @@ export const Video = ({ listingId, variant = 'bireysel' }) => {
                     </>
                   );
                 }
-                const parts = full.split(/\s+/);
+                const fullUpper = full.toLocaleUpperCase('tr-TR');
+                const parts = fullUpper.split(/\s+/);
                 const first = parts[0] || '';
                 const rest = parts.length > 1 ? parts.slice(1).join(' ') : '';
                 return (
@@ -1035,7 +1045,7 @@ export const Video = ({ listingId, variant = 'bireysel' }) => {
                   fontSize: corpFontSize,
                   fontFamily: "'Product Sans Bold', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
                   textAlign: 'center'
-                }}>{full}</div>
+                }}>{full.toLocaleUpperCase('tr-TR')}</div>
               )}
             </div>
           );
