@@ -97,7 +97,7 @@ export default async function globalTeardown() {
       try { fs.unlinkSync(file); } catch {}
       console.log('✅ MP4 trim oluşturuldu:', listingId ? final : mp4Out);
 
-      // Copy trimmed MP4 into Remotion public directory for rendering (stable name 10317.mp4)
+  // Copy trimmed MP4 into Remotion public directory for rendering (stable name 10317.mp4)
       try {
         const srcMp4 = listingId ? final : mp4Out;
         const destMp4 = path.join(remotionPublicDir, `10317.mp4`);
@@ -114,25 +114,37 @@ export default async function globalTeardown() {
     }
   }
 
-  // Also place listing JSON into Remotion public/listings (stable name 10317.json)
+  // Also place listing JSON into Remotion public/listings
   try {
     const listingId = process.env.LISTING_ID;
+    const strict = String(process.env.STRICT_FIXTURES || '').trim() === '1';
     const candidates = [
-      path.resolve('tests', 'fixtures', '10317.json'),
-      ...(listingId ? [path.resolve('tests', 'fixtures', `${listingId}.json`)] : [])
+      ...(listingId ? [
+        path.resolve('tests', 'fixtures', `listing-${listingId}.json`),
+        path.resolve('tests', 'fixtures', `${listingId}.json`)
+      ] : []),
+      ...(!strict ? [path.resolve('tests', 'fixtures', '10317.json')] : [])
     ];
     const fixturesJson = candidates.find((p) => fs.existsSync(p));
     if (!fixturesJson) {
       console.warn('⚠️ Fixture JSON bulunamadı, atlanıyor. Aranan yollar:', candidates.join(', '));
       return;
     }
-    const destJson = path.join(remotionListingsDir, `10317.json`);
-    try {
-      const txt = fs.readFileSync(fixturesJson, 'utf-8');
-      fs.writeFileSync(destJson, txt, { encoding: 'utf-8', flag: 'w' }); // overwrite/truncate
-      console.log('📦 JSON Remotion public/listings klasörüne yazıldı (override):', destJson);
-    } catch (e) {
-      console.warn('⚠️ JSON yazma hatası:', e);
+    // Write to both the requested listing id and the legacy 10317.json for compatibility (unless strict and no id)
+    const txt = fs.readFileSync(fixturesJson, 'utf-8');
+    if (listingId) {
+      const destById = path.join(remotionListingsDir, `${listingId}.json`);
+      fs.writeFileSync(destById, txt, { encoding: 'utf-8', flag: 'w' });
+      console.log('📦 JSON Remotion public/listings klasörüne yazıldı (override):', destById);
+    }
+    if (!strict) {
+      const destStable = path.join(remotionListingsDir, `10317.json`);
+      try {
+        fs.writeFileSync(destStable, txt, { encoding: 'utf-8', flag: 'w' });
+        console.log('📦 JSON Remotion public/listings klasörüne yazıldı (override):', destStable);
+      } catch (e) {
+        console.warn('⚠️ JSON yazma hatası:', e);
+      }
     }
   } catch (e) {
     console.warn('⚠️ JSON Remotion public/listings kopyalama hatası:', e);

@@ -2,6 +2,7 @@ import { execSync, spawn, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
 import path from 'node:path';
+import https from 'node:https';
 
 async function main() {
   const listingIdArg = process.argv[2] || process.env.LISTING_ID;
@@ -15,8 +16,8 @@ async function main() {
   const remotionDir = path.resolve(rootDir, 'satarizaevideo', 'remotion');
   const remotionPublicDir = path.join(remotionDir, 'public');
   const listingsDir = path.join(remotionPublicDir, 'listings');
-  // Always render with fixed Remotion listing id
-  const remotionListingId = 10317;
+  // Render with requested listing id (fallback to 10317 for safety)
+  const remotionListingId = Number(listingIdArg) || 10317;
   const listingsJsonPath = path.join(listingsDir, `${String(remotionListingId)}.json`);
   const outputsDir = path.resolve(rootDir, 'satarizaevideo', 'outputs');
 
@@ -26,32 +27,26 @@ async function main() {
   console.log('▶️ Test başlatılıyor... LISTING_ID=%s', listingIdArg);
   execSync('npm run test', {
     stdio: 'inherit',
-    env: { ...process.env, LISTING_ID: String(listingIdArg) }
+    env: { ...process.env, LISTING_ID: String(listingIdArg), STRICT_FIXTURES: '1' }
   });
 
   // 2) Preview başlat (arka planda) - kullanıcı talebi: npm run preview
-  console.log('▶️ Preview başlatılıyor...');
-  const preview = spawn('npm', ['run', 'preview'], {
-    cwd: rootDir,
-    stdio: 'inherit',
-    env: { ...process.env }
-  });
-
-  // Biraz bekle (server ayağa kalksın)
-  await new Promise((r) => setTimeout(r, 3000));
-
-  // 3) İlan numarasını JSON'dan çek ve son 5 haneyi hesapla
-  let last5 = '00000';
-  try {
-    const txt = await fsp.readFile(listingsJsonPath, 'utf-8');
-    const json = JSON.parse(txt);
-    const ln = json?.data?.listing_number ?? json?.listing_number;
-    const digits = String(ln ?? '').replace(/\D/g, '');
-    if (digits) last5 = digits.slice(-5);
-  } catch (e) {
-    console.warn('⚠️ JSON okunamadı, varsayılan 00000 kullanılacak:', e?.message);
+  // Opsiyonel: ayrı preview başlat (genelde Playwright kendi webServer'ını açar)
+  let preview = null;
+  const enablePreview = String(process.env.ENABLE_PREVIEW || '').trim() === '1';
+  if (enablePreview) {
+    console.log('▶️ Preview başlatılıyor...');
+    preview = spawn('npm', ['run', 'preview'], {
+      cwd: rootDir,
+      stdio: 'inherit',
+      env: { ...process.env },
+      detached: process.platform !== 'win32',
+    });
+    // Biraz bekle (server ayağa kalksın)
+    await new Promise((r) => setTimeout(r, 3000));
   }
-  // 3.5) Remotion için güncel listing JSON'unu public/listings altına koy
+
+  // 3) Remotion için güncel listing JSON'unu public/listings altına koy
   try {
     await fsp.mkdir(listingsDir, { recursive: true });
     const fixtureListingPref = path.resolve(rootDir, 'tests', 'fixtures', `listing-${String(remotionListingId)}.json`);
@@ -65,21 +60,57 @@ async function main() {
     } else {
       // Son çare: canlı API'den çekmeyi dene
       try {
-        const url = `https://www.satariz.com/api/api/v1/listing/${String(remotionListingId)}`;
-        const res = await fetch(url);
-        if (res.ok) {
-          const buf = Buffer.from(await res.arrayBuffer());
-          await fsp.writeFile(listingsJsonPath, buf);
-          console.log('🌐 Listing JSON API’den indirildi -> %s', listingsJsonPath);
-        } else {
-          console.warn('⚠️ API yanıtı başarısız: %s %s', res.status, res.statusText);
-        }
+        const url = `https://www.satariz.com/api/v1/listing/${String(remotionListingId)}`;
+        const fetchWithFallback = async () => {
+          if (typeof fetch === 'function') {
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(`status ${res.status}`);
+            const buf = Buffer.from(await res.arrayBuffer());
+            return buf;
+          }
+          // Node <18 fallback
+          const data = await new Promise((resolve, reject) => {
+            https.get(url, (resp) => {
+              if (resp.statusCode < 200 || resp.statusCode >= 300) {
+                reject(new Error(`status ${resp.statusCode}`));
+                resp.resume();
+                return;
+              }
+              const chunks = [];
+              resp.on('data', (c) => chunks.push(c));
+              resp.on('end', () => resolve(Buffer.concat(chunks)));
+            }).on('error', reject);
+          });
+          return data;
+        };
+        const buf = await fetchWithFallback();
+        await fsp.writeFile(listingsJsonPath, buf);
+        console.log('🌐 Listing JSON API’den indirildi -> %s', listingsJsonPath);
       } catch (e) {
         console.warn('⚠️ API’den listing çekilemedi:', e?.message);
       }
     }
   } catch (e) {
     console.warn('⚠️ Listing JSON hazırlama adımı atlandı:', e?.message);
+  }
+
+  // 3.5) İlan numarasını JSON'dan çek ve son 5 haneyi hesapla
+  let last5 = '00000';
+  try {
+    const txt = await fsp.readFile(listingsJsonPath, 'utf-8');
+    const json = JSON.parse(txt);
+    const ln = json?.data?.listing_number ?? json?.listing_number;
+    const digits = String(ln ?? '').replace(/\D/g, '');
+    if (digits) last5 = digits.slice(-5);
+  } catch (e) {
+    console.warn('⚠️ JSON okunamadı, varsayılan 00000 kullanılacak:', e?.message);
+  }
+  // Ensure listing JSON exists and seems valid to avoid empty renders
+  try {
+    await fsp.access(listingsJsonPath, fs.constants.R_OK);
+  } catch {
+    console.error('❌ Listing JSON bulunamadı: %s', listingsJsonPath);
+    process.exit(1);
   }
 
 
@@ -94,7 +125,8 @@ async function main() {
       i += 1;
     }
   };
-  const outFile = makeUniquePath(outputsDir, `${last5}`, '.mp4');
+  const baseName = process.env.OUTPUT_BASENAME ? String(process.env.OUTPUT_BASENAME) : `${last5}`;
+  const outFile = makeUniquePath(outputsDir, baseName, '.mp4');
 
   // 4) Render al
   console.log('🎬 Render başlıyor -> %s', outFile);
@@ -107,9 +139,35 @@ async function main() {
 
   console.log('✅ Render tamamlandı:', outFile);
 
-  // İsteğe bağlı: Preview'ı sonlandır
+  // İsteğe bağlı: Preview'ı sonlandır (robust on Linux)
   try {
-    preview.kill('SIGINT');
+    const killPreview = async () => {
+      if (!preview || preview.killed) return;
+      const isWin = process.platform === 'win32';
+      const signal = 'SIGTERM';
+      try {
+        if (!isWin && preview.pid) {
+          // Kill the whole process group
+          process.kill(-preview.pid, signal);
+        } else {
+          preview.kill(signal);
+        }
+      } catch {}
+      await new Promise((resolve) => {
+        const t = setTimeout(resolve, 1500);
+        preview.once('exit', () => { clearTimeout(t); resolve(); });
+        preview.once('close', () => { clearTimeout(t); resolve(); });
+      });
+      // Fallback to SIGKILL if still alive
+      try {
+        if (!isWin && preview.pid) {
+          process.kill(-preview.pid, 'SIGKILL');
+        } else {
+          preview.kill('SIGKILL');
+        }
+      } catch {}
+    };
+    if (preview) await killPreview();
   } catch {}
 
   // 4.5) Variant'a göre sesi videoya ekle (yeniden kodlama yok)
@@ -151,23 +209,30 @@ async function main() {
     }
   }
 
+  // Machine-readable output marker for API consumers
+  try {
+    console.log('::OUTPUT::%s', outFile);
+  } catch {}
+
   // Post-render cleanup: remove temporary public copies to avoid stale re-use
   try {
-    const pubMp4Stable = path.join(remotionPublicDir, `10317.mp4`);
-    const pubMp4ById = path.join(remotionPublicDir, `${String(listingIdArg)}.mp4`);
-    const pubJson = path.join(remotionPublicDir, 'listings', `${String(remotionListingId)}.json`);
-    // Remove any temporary MP4s written to public
-    try { await fsp.unlink(pubMp4Stable); } catch {}
-    try { await fsp.unlink(pubMp4ById); } catch {}
-    // Remove the temporary JSON used by Remotion
-    try { await fsp.unlink(pubJson); } catch {}
+    const toDelete = new Set([
+      path.join(remotionPublicDir, '10317.mp4'),
+      path.join(remotionPublicDir, `${String(listingIdArg)}.mp4`),
+      path.join(remotionPublicDir, `${String(remotionListingId)}.mp4`),
+      path.join(remotionPublicDir, 'listings', '10317.json'),
+      path.join(remotionPublicDir, 'listings', `${String(remotionListingId)}.json`),
+    ]);
+    for (const p of toDelete) {
+      try { await fsp.unlink(p); } catch {}
+    }
     console.log('🧹 Geçici public kopyalar temizlendi.');
   } catch {}
 
   // Cleanup fixtures JSON so next run always fetches fresh data
   try {
     const fixturesDir = path.resolve(rootDir, 'tests', 'fixtures');
-    const stableJson = path.join(fixturesDir, '10317.json');
+    const stableJson = path.join(fixturesDir, `${String(remotionListingId)}.json`);
     const idJson = path.join(fixturesDir, `${String(listingIdArg)}.json`);
     try { await fsp.unlink(stableJson); } catch {}
     try { await fsp.unlink(idJson); } catch {}

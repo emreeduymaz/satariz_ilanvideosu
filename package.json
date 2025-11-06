@@ -12,7 +12,8 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:install": "playwright install --with-deps",
-    "video:run": "node scripts/pipeline.mjs"
+    "video:run": "node scripts/pipeline.mjs",
+    "start:api": "node server.mjs"
   },
   "dependencies": {
     "embla-carousel": "^8.6.0",

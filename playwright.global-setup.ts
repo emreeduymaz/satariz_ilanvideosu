@@ -12,10 +12,13 @@ export default async function globalSetup() {
     console.warn('⚠️ LISTING_ID env yok, fixture JSON indirilmeyecek.');
     return;
   }
-  const outPath = path.join(fixturesDir, `10317.json`);
+  const outPathStable = path.join(fixturesDir, `10317.json`);
+  const outPathById = path.join(fixturesDir, `${LISTING_ID}.json`);
+  const outPathListingPref = path.join(fixturesDir, `listing-${LISTING_ID}.json`);
   try {
-    await fs.access(outPath);
-    return;
+    if (await fs.stat(outPathListingPref).then(() => true).catch(() => false)) return;
+    if (await fs.stat(outPathById).then(() => true).catch(() => false)) return;
+    if (await fs.stat(outPathStable).then(() => true).catch(() => false)) return;
   } catch {}
 
   const url = `https://www.satariz.com/api/v1/listing/${LISTING_ID}`;
@@ -23,7 +26,10 @@ export default async function globalSetup() {
   if (!res.ok) throw new Error(`Failed to fetch listing JSON: ${res.status}`);
   const body = await res.text();
   await fs.mkdir(fixturesDir, { recursive: true });
-  await fs.writeFile(outPath, body, 'utf-8');
+  // Write in multiple names for compatibility
+  await fs.writeFile(outPathListingPref, body, 'utf-8');
+  await fs.writeFile(outPathById, body, 'utf-8');
+  await fs.writeFile(outPathStable, body, 'utf-8');
 
   // Also pre-download images referenced in the JSON to avoid runtime delays
   try {
@@ -52,8 +58,10 @@ export default async function globalSetup() {
       } catch {}
     }
 
-    const mapPath = path.join(fixturesDir, `image-map-10317.json`);
-    await fs.writeFile(mapPath, JSON.stringify(map, null, 2), 'utf-8');
+    const mapStable = path.join(fixturesDir, `image-map-10317.json`);
+    const mapById = path.join(fixturesDir, `image-map-${LISTING_ID}.json`);
+    await fs.writeFile(mapById, JSON.stringify(map, null, 2), 'utf-8');
+    await fs.writeFile(mapStable, JSON.stringify(map, null, 2), 'utf-8');
   } catch {
     // ignore image predownload errors
   }
