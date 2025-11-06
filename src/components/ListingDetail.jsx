@@ -278,23 +278,42 @@ export default function ListingDetail({ dataListing = {}, windowWidth = FRAME_WI
                 </div>
                 <Divider width={windowWidth} />
                 <div style={{ height: FaktorelGenislik(38), display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f7f7f7' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: FaktorelGenislik(6) }}>
-                    {d?.corporate?.logo ? (
-                      <div style={{ width: FaktorelGenislik(28), height: FaktorelGenislik(28), borderRadius: 100, backgroundColor: Colors.white, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <ImageBackground
-                          source={{ uri: d?.corporate?.logo }}
-                          resizeMode="cover"
-                          borderRadius={100}
-                          width={FaktorelGenislik(24)}
-                          height={FaktorelGenislik(24)}
-                          style={{ width: FaktorelGenislik(24), height: FaktorelGenislik(24), borderRadius: 100 }}
-                        />
+                  {(() => {
+                    const nameText = d?.corporate?.store_name || d?.sales_representative?.name || '';
+                    const nameFontSize = FaktorelGenislik(12);
+                    const defaultAvatar = 'https://www.satariz.com/inc/profile-default.png';
+                    const avatarCandidates = [
+                      d?.corporate?.logo,
+                      d?.sales_representative?.image,
+                      d?.sales_representative?.photo,
+                      d?.sales_representative?.avatar,
+                      d?.publisher?.photo,
+                      d?.publisher?.image,
+                      d?.publisher?.avatar,
+                      d?.user?.profile_image,
+                      d?.user?.photo,
+                      d?.user?.avatar,
+                    ].map(v => (typeof v === 'string' ? v.trim() : ''));
+                    const avatarUrl = (avatarCandidates.find(u => u) || defaultAvatar);
+                    const size = nameFontSize;
+                    return (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: FaktorelGenislik(4) }}>
+                        <div style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: Colors.white, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                          <ImageBackground
+                            source={{ uri: avatarUrl }}
+                            resizeMode="cover"
+                            borderRadius={size / 2}
+                            width={size}
+                            height={size}
+                            style={{ width: size, height: size, borderRadius: size / 2 }}
+                          />
+                        </div>
+                        <DefaultTextStyle style={{ textAlign: 'center' }} color={Colors.black161616} fontType={'medium'} fontSize={nameFontSize}>
+                          {nameText}
+                        </DefaultTextStyle>
                       </div>
-                    ) : null}
-                    <DefaultTextStyle style={{ textAlign: 'center' }} color={Colors.primary} fontType={'medium'} fontSize={FaktorelGenislik(12)}>
-                      {d?.corporate?.store_name || d?.sales_representative?.name || ''}
-                    </DefaultTextStyle>
-                  </div>
+                    );
+                  })()}
                 </div>
               </div>
             </div>

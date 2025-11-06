@@ -97,7 +97,7 @@ export default async function globalTeardown() {
       try { fs.unlinkSync(file); } catch {}
       console.log('✅ MP4 trim oluşturuldu:', listingId ? final : mp4Out);
 
-  // Copy trimmed MP4 into Remotion public directory for rendering (stable name 10317.mp4)
+      // Copy trimmed MP4 into Remotion public directory for rendering (stable 10317.mp4 and id-based)
       try {
         const srcMp4 = listingId ? final : mp4Out;
         const destMp4 = path.join(remotionPublicDir, `10317.mp4`);
@@ -105,6 +105,11 @@ export default async function globalTeardown() {
           const buf = fs.readFileSync(srcMp4);
           fs.writeFileSync(destMp4, buf, { flag: 'w' }); // overwrite/truncate
           console.log('📦 MP4 Remotion public klasörüne yazıldı (override):', destMp4);
+          if (listingId) {
+            const destById = path.join(remotionPublicDir, `${listingId}.mp4`);
+            fs.writeFileSync(destById, buf, { flag: 'w' });
+            console.log('📦 MP4 Remotion public klasörüne yazıldı (id):', destById);
+          }
         }
       } catch (e) {
         console.warn('⚠️ MP4 Remotion public kopyalama hatası:', e);

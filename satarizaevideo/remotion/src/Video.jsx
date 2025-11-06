@@ -992,15 +992,15 @@ export const Video = ({ listingId, variant = 'bireysel' }) => {
                 zIndex: 2
               }}>
                 {frame <= playStart && (
-                  <div style={{ position: 'absolute', inset: 0, zIndex: 2 }}>
+                  <div style={{ position: 'absolute', inset: 0, zIndex: 2, color: 'transparent' }}>
                     <Freeze frame={0}>
-                      <OffthreadVideo src={staticFile('10317.mp4')} style={{ width: '100%', height: '100%', objectFit: 'fill' }} muted />
+                      <OffthreadVideo src={staticFile(`${String(listingId)}.mp4`)} style={{ width: '100%', height: '100%', objectFit: 'fill' }} muted />
                     </Freeze>
                   </div>
                 )}
                 <Sequence from={Math.max(0, playStart - preloadFrames)}>
-                  <div style={{ position: 'absolute', inset: 0, zIndex: 2 }}>
-                    <OffthreadVideo src={staticFile('10317.mp4')} style={{ width: '100%', height: '100%', objectFit: 'fill' }} muted playbackRate={1.25} />
+                  <div style={{ position: 'absolute', inset: 0, zIndex: 2, color: 'transparent' }}>
+                    <OffthreadVideo src={staticFile(`${String(listingId)}.mp4`)} style={{ width: '100%', height: '100%', objectFit: 'fill' }} muted playbackRate={1.25} />
                   </div>
                 </Sequence>
               </div>

@@ -52,6 +52,7 @@ export function ThreeTabs({
             height,
             flex: 1,
             background: isOne ? activeBackgroundColor : passiveBackgroundColor,
+            backgroundColor: isOne ? activeBackgroundColor : passiveBackgroundColor,
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
@@ -59,6 +60,10 @@ export function ThreeTabs({
             borderBottomLeftRadius: 5,
             border: 'none',
             cursor: 'pointer',
+            appearance: 'none',
+            WebkitAppearance: 'none',
+            color: isOne ? activeTextColor : passiveTextColor,
+            WebkitTextFillColor: isOne ? activeTextColor : passiveTextColor,
           }}
         >
           {OneTabIcon ? <span style={{ marginRight: FaktorelGenislik(5) }}>{OneTabIcon}</span> : null}
@@ -72,11 +77,16 @@ export function ThreeTabs({
             height,
             flex: 1,
             background: isTwo ? activeBackgroundColor : passiveBackgroundColor,
+            backgroundColor: isTwo ? activeBackgroundColor : passiveBackgroundColor,
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
             border: 'none',
             cursor: 'pointer',
+            appearance: 'none',
+            WebkitAppearance: 'none',
+            color: isTwo ? activeTextColor : passiveTextColor,
+            WebkitTextFillColor: isTwo ? activeTextColor : passiveTextColor,
           }}
         >
           {TwoTabIcon ? <span style={{ marginRight: FaktorelGenislik(5) }}>{TwoTabIcon}</span> : null}
@@ -87,10 +97,11 @@ export function ThreeTabs({
         {lastTabStatus ? (
           <button
             onClick={threeButtonPress}
-            style={{
+          style={{
               height,
               flex: 1,
               background: isThree ? activeBackgroundColor : passiveBackgroundColor,
+              backgroundColor: isThree ? activeBackgroundColor : passiveBackgroundColor,
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
@@ -98,6 +109,10 @@ export function ThreeTabs({
               borderBottomRightRadius: 5,
               border: 'none',
               cursor: 'pointer',
+              appearance: 'none',
+              WebkitAppearance: 'none',
+              color: isThree ? activeTextColor : passiveTextColor,
+              WebkitTextFillColor: isThree ? activeTextColor : passiveTextColor,
             }}
           >
             {ThreeTabIcon ? <span style={{ marginRight: FaktorelGenislik(5) }}>{ThreeTabIcon}</span> : null}
@@ -136,12 +151,17 @@ export function ThreeTabs({
             height,
             width: buttonWidth,
             background: isOne ? activeBackgroundColor : passiveBackgroundColor,
+            backgroundColor: isOne ? activeBackgroundColor : passiveBackgroundColor,
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
             borderRadius: 5,
             border: 'none',
             cursor: 'pointer',
+            appearance: 'none',
+            WebkitAppearance: 'none',
+            color: isOne ? activeTextColor : passiveTextColor,
+            WebkitTextFillColor: isOne ? activeTextColor : passiveTextColor,
           }}
         >
           {OneTabIcon ? <span style={{ marginRight: FaktorelGenislik(5) }}>{OneTabIcon}</span> : null}
@@ -158,12 +178,17 @@ export function ThreeTabs({
             height,
             width: buttonWidth,
             background: isTwo ? activeBackgroundColor : passiveBackgroundColor,
+            backgroundColor: isTwo ? activeBackgroundColor : passiveBackgroundColor,
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
             borderRadius: 5,
             border: 'none',
             cursor: 'pointer',
+            appearance: 'none',
+            WebkitAppearance: 'none',
+            color: isTwo ? activeTextColor : passiveTextColor,
+            WebkitTextFillColor: isTwo ? activeTextColor : passiveTextColor,
           }}
         >
           {TwoTabIcon ? <span style={{ marginRight: FaktorelGenislik(5) }}>{TwoTabIcon}</span> : null}
@@ -180,12 +205,17 @@ export function ThreeTabs({
             height,
             width: buttonWidth,
             background: isThree ? activeBackgroundColor : passiveBackgroundColor,
+            backgroundColor: isThree ? activeBackgroundColor : passiveBackgroundColor,
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
             borderRadius: 5,
             border: 'none',
             cursor: 'pointer',
+            appearance: 'none',
+            WebkitAppearance: 'none',
+            color: isThree ? activeTextColor : passiveTextColor,
+            WebkitTextFillColor: isThree ? activeTextColor : passiveTextColor,
           }}
         >
           {ThreeTabIcon ? <span style={{ marginRight: FaktorelGenislik(5) }}>{ThreeTabIcon}</span> : null}
