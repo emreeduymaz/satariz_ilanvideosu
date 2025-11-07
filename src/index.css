@@ -80,6 +80,11 @@ button {
   cursor: pointer;
   transition: border-color 0.25s;
 }
+
+/* Listing detail: remove padding for the primary tab button (İlan Bilgileri) */
+.listing-tab-no-padding {
+  padding: 0 !important;
+}
 button:hover {
   border-color: #646cff;
 }

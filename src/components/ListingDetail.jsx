@@ -264,15 +264,15 @@ export default function ListingDetail({ dataListing = {}, windowWidth = FRAME_WI
                 </div>
               )}
 
-              <div style={{ width: windowWidth, backgroundColor: '#000' }}>
+              <div style={{ width: windowWidth, backgroundColor: '#f7f7f7' }}>
                 <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingTop: FaktorelGenislik(5) }}>
                   <DefaultTextStyle style={{ textAlign: 'center', lineHeight: FaktorelGenislik(1) }} color={Colors.primary} fontType={'medium'} fontSize={FaktorelGenislik(12)}>
                     {(d?.category_parents || []).map((item, index, arr) => index === arr.length - 1 ? `${item?.title}` : `${item?.title} ›`).join(' ')}
                   </DefaultTextStyle>
                 </div>
 
-                <div style={{ height: FaktorelGenislik(20), display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#000'}}>
-                  <DefaultTextStyle style={{ marginBottom: 0, textAlign: 'center' }} color={Colors.disabled} fontType={'medium'} fontSize={FaktorelGenislik(12)}>
+                <div style={{ height: FaktorelGenislik(20), display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f7f7f7'}}>
+                  <DefaultTextStyle style={{ marginBottom: 0, textAlign: 'center' }} color={Colors.f7f7f7} fontType={'medium'} fontSize={FaktorelGenislik(12)}>
                     {locationText}
                   </DefaultTextStyle>
                 </div>
@@ -324,6 +324,7 @@ export default function ListingDetail({ dataListing = {}, windowWidth = FRAME_WI
             <div style={{ position: 'sticky', top: 0, zIndex: 2, background: Colors.backgroundF2F3F5, paddingLeft: FaktorelGenislik(10), paddingRight: FaktorelGenislik(10), width: windowWidth, boxSizing: 'border-box' }}>
               <div style={{ height: FaktorelGenislik(38), marginTop: FaktorelGenislik(10), marginBottom: FaktorelGenislik(10), width: '100%', borderRadius: 5, display: 'flex', justifyContent: 'space-between', alignItems: 'center', alignSelf: 'center' }}>
                 <button
+                  className="listing-tab-no-padding"
                   onClick={() => { setTab('one'); scrollToTab(); }}
                   style={{
                     height: FaktorelGenislik(38),
@@ -336,7 +337,14 @@ export default function ListingDetail({ dataListing = {}, windowWidth = FRAME_WI
                     color: Colors.white, WebkitTextFillColor: Colors.white,
                   }}
                 >
-                  <DefaultTextStyle color={Colors.white} fontType={'bold'} fontSize={FaktorelGenislik(11)}>İlan Bilgileri</DefaultTextStyle>
+                  <DefaultTextStyle
+                    color={Colors.white}
+                    fontType={'bold'}
+                    fontSize={FaktorelGenislik(11)}
+                    style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0, maxWidth: '100%', display: 'block', textAlign: 'center' }}
+                  >
+                    İlan Bilgileri
+                  </DefaultTextStyle>
                 </button>
 
                 <button
@@ -352,7 +360,14 @@ export default function ListingDetail({ dataListing = {}, windowWidth = FRAME_WI
                     color: Colors.black161616, WebkitTextFillColor: Colors.black161616,
                   }}
                 >
-                  <DefaultTextStyle color={Colors.black161616} fontType={'bold'} fontSize={FaktorelGenislik(11)}>Açıklama</DefaultTextStyle>
+                  <DefaultTextStyle
+                    color={Colors.black161616}
+                    fontType={'bold'}
+                    fontSize={FaktorelGenislik(11)}
+                    style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0, maxWidth: '100%', display: 'block', textAlign: 'center' }}
+                  >
+                    Açıklama
+                  </DefaultTextStyle>
                 </button>
 
                 <button
@@ -368,7 +383,14 @@ export default function ListingDetail({ dataListing = {}, windowWidth = FRAME_WI
                     color: Colors.black161616, WebkitTextFillColor: Colors.black161616,
                   }}
                 >
-                  <DefaultTextStyle color={Colors.black161616} fontType={'bold'} fontSize={FaktorelGenislik(11)}>Konum</DefaultTextStyle>
+                  <DefaultTextStyle
+                    color={Colors.black161616}
+                    fontType={'bold'}
+                    fontSize={FaktorelGenislik(11)}
+                    style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0, maxWidth: '100%', display: 'block', textAlign: 'center' }}
+                  >
+                    Konum
+                  </DefaultTextStyle>
                 </button>
               </div>
             </div>
