@@ -9,7 +9,7 @@ const FINAL_HOLD_MS = 300; // sonunda kısa bekleme (kare yakalansın)
 const MAX_IMAGES = 7; // en fazla 7 görsel üzerinden kaydır
 
 test('ilan sayfasında resimler sağdan sola kaydırılır ve video kaydedilir', async ({ page }) => {
-  const LISTING_ID = process.env.LISTING_ID;
+  const LISTING_ID = process.env.LISTING_ID || '10317';
   // Route API to local fixture to avoid network delay
   const jsonCandidates = [
     path.resolve(process.cwd(), 'tests', 'fixtures', `listing-${LISTING_ID}.json`),

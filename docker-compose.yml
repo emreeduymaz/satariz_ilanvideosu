@@ -1,0 +1,17 @@
+version: '3.9'
+services:
+  app:
+    build: .
+    image: satarizilandetay:latest
+    environment:
+      - TZ=Etc/UTC
+      - CI=1
+      - LISTING_ID=10317
+      - VARIANT=bireysel
+      - PUPPETEER_EXECUTABLE_PATH=/usr/local/bin/chromium-playwright
+      - REMOTION_CHROMIUM_EXECUTABLE=/usr/local/bin/chromium-playwright
+    ports:
+      - "5173:5173"
+      - "4000:4000"
+    command: ["bash", "-lc", "npm run start:api"]
+

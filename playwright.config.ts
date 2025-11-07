@@ -16,6 +16,19 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:5173',
     trace: 'on-first-retry',
+    headless: true,
+    timezoneId: 'UTC',
+    locale: 'tr-TR',
+    colorScheme: 'light',
+    launchOptions: {
+      args: [
+        '--disable-gpu',
+        '--force-device-scale-factor=1',
+        '--disable-lcd-text',
+        '--disable-font-subpixel-positioning',
+        '--font-render-hinting=none',
+      ],
+    },
   },
   webServer: {
     command: 'npm run dev',
@@ -33,7 +46,7 @@ export default defineConfig({
         deviceScaleFactor: 1,
         isMobile: true,
         hasTouch: true,
-        video: 'on',
+        video: { mode: 'on', size: { width: 375, height: 812 } },
       },
     },
   ],

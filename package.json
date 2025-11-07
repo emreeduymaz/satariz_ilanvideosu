@@ -13,7 +13,11 @@
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:install": "playwright install --with-deps",
     "video:run": "node scripts/pipeline.mjs",
-    "start:api": "node server.mjs"
+    "start:api": "node server.mjs",
+    "docker:build": "docker build -t satarizilandetay .",
+    "docker:test": "docker run --rm -e CI=1 -e LISTING_ID=$LISTING_ID -p 5173:5173 -v $(pwd)/test-results:/app/test-results satarizilandetay npx playwright test",
+    "docker:video": "docker run --rm -e LISTING_ID=$LISTING_ID -e VARIANT=$VARIANT -v $(pwd)/satarizaevideo/outputs:/app/satarizaevideo/outputs satarizilandetay node scripts/pipeline.mjs",
+    "docker:api": "docker run --rm -p 4000:4000 satarizilandetay npm run start:api"
   },
   "dependencies": {
     "embla-carousel": "^8.6.0",
