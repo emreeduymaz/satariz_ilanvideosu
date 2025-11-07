@@ -65,8 +65,8 @@ export default function Header({
           onClick={leftIcon ? leftAction : undefined}
         >
           {leftIcon ? (
-            <span style={{ margin: -FaktorelGenislik(18) }}>
-              <HeaderChevronLeftIcon size={FaktorelGenislik(30)} stroke={Colors.white} />
+            <span style={{ marginLeft: -FaktorelGenislik(12), marginTop: FaktorelGenislik(12) }}>
+              <HeaderChevronLeftIcon size={FaktorelGenislik(35)} stroke={Colors.white} />
             </span>
           ) : null}
         </button>
@@ -83,10 +83,10 @@ export default function Header({
           }}
         >
           <DefaultTextStyle
-            style={{ marginLeft: FaktorelGenislik(25) }}
+            style={{ marginLeft: FaktorelGenislik(25), marginTop: FaktorelGenislik(12) }}
             color={Colors.white}
             fontType={'bold'}
-            fontSize={FaktorelGenislik(14)}
+            fontSize={FaktorelGenislik(15)}
           >
             İlan Detayı
           </DefaultTextStyle>
@@ -146,16 +146,17 @@ export default function Header({
                     border: 'none',
                     cursor: 'pointer',
                     marginRight: FaktorelGenislik(-25),
+                    marginTop: FaktorelGenislik(12),
                   }}
                   onClick={rightHeartAction}
                 >
-                  <HeaderHeartIcon size={FaktorelGenislik(22)} fill={'none'} stroke={Colors.white} />
+                  <HeaderHeartIcon size={FaktorelGenislik(25)} fill={'none'} stroke={Colors.white} />
                 </button>
               ) : null}
               {rightShareIcon ? (
                 <button
                   style={{
-                    marginRight: FaktorelGenislik(12),
+                    marginRight: -FaktorelGenislik(10),
                     height: '100%',
                     justifyContent: 'center',
                     alignItems: 'center',
@@ -163,10 +164,11 @@ export default function Header({
                     background: 'transparent',
                     border: 'none',
                     cursor: 'pointer',
+                    marginTop: FaktorelGenislik(12),
                   }}
                   onClick={rightShareAction}
                 >
-                  <MdiIcon path={mdiExportVariant} size={FaktorelGenislik(22) / 24} color={Colors.white} />
+                  <MdiIcon path={mdiExportVariant} size={FaktorelGenislik(25) / 24} color={Colors.white} />
                 </button>
               ) : null}
             </div>

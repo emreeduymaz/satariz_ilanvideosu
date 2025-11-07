@@ -1175,27 +1175,40 @@ export const Video = ({ listingId, variant = 'bireysel' }) => {
                 })()}
               </Sequence>
               {/* Final bottom row: icon + Ilan No, delayed start and 4s hold */}
-              {frame >= ilanStart && frame < ilanEnd && (
-                <div style={{
-                  position: 'absolute',
-                  left: Math.round(width * 0.04),
-                  right: Math.round(width * 0.04),
-                  bottom: Math.round(height * 0.15),
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-                  zIndex: 3
-                }}>
-                  <Img src={staticFile('siyahtiklama.png')} style={{ height: Math.round(height * 0.06), width: 'auto' }} />
+              {frame >= ilanStart && frame < ilanEnd && (() => {
+                const slideFrames = Math.round(0.5 * fps);
+                const p = interpolate(
+                  frame,
+                  [ilanStart, ilanStart + slideFrames],
+                  [0, 1],
+                  { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) }
+                );
+                const tx = interpolate(p, [0, 1], [Math.round(width * 0.5), 0]);
+                const opacity = interpolate(p, [0, 0.1, 1], [0, 1, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+                return (
                   <div style={{
-                    color: orange,
-                    fontFamily: "'Product Sans Bold', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
-                    fontWeight: 600,
-                    fontSize: Math.max(14, Math.round(height * 0.03)),
-                    textAlign: 'center'
+                    position: 'absolute',
+                    left: Math.round(width * 0.04),
+                    right: Math.round(width * 0.04),
+                    bottom: Math.round(height * 0.15),
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                    zIndex: 3,
+                    transform: `translateX(${tx}px)`,
+                    opacity
                   }}>
-                    {ilanNo ? `İlan No: ${ilanNo}` : ''}
+                    <Img src={staticFile('siyahtiklama.png')} style={{ height: Math.round(height * 0.06), width: 'auto' }} />
+                    <div style={{
+                      color: orange,
+                      fontFamily: "'Product Sans Bold', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+                      fontWeight: 600,
+                      fontSize: Math.max(14, Math.round(height * 0.03)),
+                      textAlign: 'center'
+                    }}>
+                      {ilanNo ? `İlan No: ${ilanNo}` : ''}
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
             </>
           ) : (
             // Corporate: Centered stack (Text -> Logo -> Ilan No), no inner video
