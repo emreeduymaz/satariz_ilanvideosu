@@ -272,7 +272,7 @@ export default function ListingDetail({ dataListing = {}, windowWidth = FRAME_WI
                 </div>
 
                 <div style={{ height: FaktorelGenislik(20), display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f7f7f7'}}>
-                  <DefaultTextStyle style={{ marginBottom: 0, textAlign: 'center' }} color={Colors.f7f7f7} fontType={'medium'} fontSize={FaktorelGenislik(12)}>
+                  <DefaultTextStyle style={{ marginBottom: 0, textAlign: 'center' }} color={Colors.disabled} fontType={'medium'} fontSize={FaktorelGenislik(12)}>
                     {locationText}
                   </DefaultTextStyle>
                 </div>
