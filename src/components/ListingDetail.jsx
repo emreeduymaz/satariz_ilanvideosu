@@ -264,14 +264,14 @@ export default function ListingDetail({ dataListing = {}, windowWidth = FRAME_WI
                 </div>
               )}
 
-              <div style={{ width: windowWidth, backgroundColor: '#f7f7f7' }}>
+              <div style={{ width: windowWidth, backgroundColor: '#000' }}>
                 <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingTop: FaktorelGenislik(5) }}>
                   <DefaultTextStyle style={{ textAlign: 'center', lineHeight: FaktorelGenislik(1) }} color={Colors.primary} fontType={'medium'} fontSize={FaktorelGenislik(12)}>
                     {(d?.category_parents || []).map((item, index, arr) => index === arr.length - 1 ? `${item?.title}` : `${item?.title} ›`).join(' ')}
                   </DefaultTextStyle>
                 </div>
 
-                <div style={{ height: FaktorelGenislik(20), display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f7f7f7'}}>
+                <div style={{ height: FaktorelGenislik(20), display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#000'}}>
                   <DefaultTextStyle style={{ marginBottom: 0, textAlign: 'center' }} color={Colors.disabled} fontType={'medium'} fontSize={FaktorelGenislik(12)}>
                     {locationText}
                   </DefaultTextStyle>
@@ -281,6 +281,7 @@ export default function ListingDetail({ dataListing = {}, windowWidth = FRAME_WI
                   {(() => {
                     const nameText = d?.corporate?.store_name || d?.sales_representative?.name || '';
                     const nameFontSize = FaktorelGenislik(12);
+                    const avatarFontSize = FaktorelGenislik(16);
                     const defaultAvatar = 'https://www.satariz.com/inc/profile-default.png';
                     const avatarCandidates = [
                       d?.corporate?.logo,
@@ -295,7 +296,7 @@ export default function ListingDetail({ dataListing = {}, windowWidth = FRAME_WI
                       d?.user?.avatar,
                     ].map(v => (typeof v === 'string' ? v.trim() : ''));
                     const avatarUrl = (avatarCandidates.find(u => u) || defaultAvatar);
-                    const size = nameFontSize;
+                    const size = avatarFontSize;
                     return (
                       <div style={{ display: 'flex', alignItems: 'center', gap: FaktorelGenislik(4) }}>
                         <div style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: Colors.white, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
@@ -321,22 +322,55 @@ export default function ListingDetail({ dataListing = {}, windowWidth = FRAME_WI
 
           <div style={{ backgroundColor: Colors.backgroundF2F3F5 }}>
             <div style={{ position: 'sticky', top: 0, zIndex: 2, background: Colors.backgroundF2F3F5, paddingLeft: FaktorelGenislik(10), paddingRight: FaktorelGenislik(10), width: windowWidth, boxSizing: 'border-box' }}>
-              <ThreeTabs
-                marginTop={FaktorelGenislik(10)}
-                marginBottom={FaktorelGenislik(10)}
-                oneText="İlan Bilgileri"
-                oneButtonPress={() => { setTab('one'); scrollToTab(); }}
-                twoText="Açıklama"
-                twoButtonPress={() => { setTab('two'); scrollToTab(); }}
-                threeText="Konum"
-                threeButtonPress={() => { setTab('three'); scrollToTab(); }}
-                activeBackgroundColor={Colors.black161616}
-                activeTextColor={Colors.white}
-                passiveBackgroundColor={Colors.white}
-                passiveTextColor={Colors.black161616}
-                tab={tab}
-                width={'100%'}
-              />
+              <div style={{ height: FaktorelGenislik(38), marginTop: FaktorelGenislik(10), marginBottom: FaktorelGenislik(10), width: '100%', borderRadius: 5, display: 'flex', justifyContent: 'space-between', alignItems: 'center', alignSelf: 'center' }}>
+                <button
+                  onClick={() => { setTab('one'); scrollToTab(); }}
+                  style={{
+                    height: FaktorelGenislik(38),
+                    width: FaktorelGenislik(110),
+                    background: Colors.black161616,
+                    backgroundColor: Colors.black161616,
+                    display: 'flex', justifyContent: 'center', alignItems: 'center',
+                    borderRadius: 5,
+                    border: 'none', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none',
+                    color: Colors.white, WebkitTextFillColor: Colors.white,
+                  }}
+                >
+                  <DefaultTextStyle color={Colors.white} fontType={'bold'} fontSize={FaktorelGenislik(11)}>İlan Bilgileri</DefaultTextStyle>
+                </button>
+
+                <button
+                  onClick={() => { setTab('two'); scrollToTab(); }}
+                  style={{
+                    height: FaktorelGenislik(38),
+                    width: FaktorelGenislik(110),
+                    background: Colors.white,
+                    backgroundColor: Colors.white,
+                    display: 'flex', justifyContent: 'center', alignItems: 'center',
+                    borderRadius: 5,
+                    border: 'none', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none',
+                    color: Colors.black161616, WebkitTextFillColor: Colors.black161616,
+                  }}
+                >
+                  <DefaultTextStyle color={Colors.black161616} fontType={'bold'} fontSize={FaktorelGenislik(11)}>Açıklama</DefaultTextStyle>
+                </button>
+
+                <button
+                  onClick={() => { setTab('three'); scrollToTab(); }}
+                  style={{
+                    height: FaktorelGenislik(38),
+                    width: FaktorelGenislik(110),
+                    background: Colors.white,
+                    backgroundColor: Colors.white,
+                    display: 'flex', justifyContent: 'center', alignItems: 'center',
+                    borderRadius: 5,
+                    border: 'none', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none',
+                    color: Colors.black161616, WebkitTextFillColor: Colors.black161616,
+                  }}
+                >
+                  <DefaultTextStyle color={Colors.black161616} fontType={'bold'} fontSize={FaktorelGenislik(11)}>Konum</DefaultTextStyle>
+                </button>
+              </div>
             </div>
 
             {tab === 'one' ? (
