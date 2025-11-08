@@ -403,8 +403,18 @@ export default function ListingDetail({ dataListing = {}, windowWidth = FRAME_WI
                 {(d?.attributes || []).map((a, idx) => {
                   const value = a?.attribute_value_name || a?.attribute_value;
                   if (!value) return null;
+                  const name = String(a?.attribute_name || '').toLowerCase();
+                  const isKm = name === 'km' || name.includes('kilometre') || name.includes('kilometer');
+                  const formattedValue = (() => {
+                    if (!isKm) return value;
+                    const digits = String(value).replace(/[^\d]/g, '');
+                    if (!digits) return value;
+                    const num = Number(digits);
+                    if (!Number.isFinite(num)) return value;
+                    return new Intl.NumberFormat('tr-TR').format(num);
+                  })();
                   return (
-                    <AttributeRow key={`${a?.id}-${idx}`} label={a?.attribute_name} value={value} />
+                    <AttributeRow key={`${a?.id}-${idx}`} label={a?.attribute_name} value={formattedValue} />
                   );
                 })}
               </div>
