@@ -240,6 +240,24 @@ export const Video = ({ listingId, variant = 'bireysel' }) => {
     const motorVal = val(motorAttr);
     const motorValNorm = motorVal != null ? String(motorVal).replace(/\bhp\b/gi, 'HP') : null;
     const motorText = motorValNorm ? `Motor Gücü: ${motorValNorm}` : null;
+    // Tractor-specific fields
+    const kabinAttr = getAttrAny(['Kabin', 'Kabin Değeri', 'Kabin Degeri', 'kabin_degeri']);
+    const kabinVal = val(kabinAttr);
+    // Sea vehicles specific fields
+    const motorMarkasiAttr = getAttrAny(['Motor Markası', 'Motor Markasi', 'Motor Marka', 'Motor Üreticisi', 'Motor Ureticisi', 'Motor'], { exclude: ['güç', 'gucu', 'hp', 'hacmi', 'hacim', 'saat', 'adet', 'say'] });
+    const motorMarkasiVal = val(motorMarkasiAttr);
+    const boyAttr = getAttrAny(['Boy', 'Uzunluk', 'Length']);
+    const boyVal = val(boyAttr);
+    const boyDisplay = (() => {
+      if (boyVal == null) return null;
+      const s = String(boyVal).trim();
+      if (!s) return null;
+      return /m\b|metre/i.test(s) ? s : `${s} m`;
+    })();
+    const flybridgeAttr = getAttrAny(['Flybridge']);
+    const flybridgeVal = val(flybridgeAttr);
+    const govdeAttr = getAttrAny(['Gövde Malzemesi', 'Govde Malzemesi', 'Gövde', 'Govde']);
+    const govdeVal = val(govdeAttr);
 
     // Detect Minibüs by attribute or category
     const aracTuruAttr = getAttrAny([
@@ -305,6 +323,30 @@ export const Video = ({ listingId, variant = 'bireysel' }) => {
         return t.includes('moto') || s.includes('moto');
       });
     })();
+    // Detect Sea vehicles (Deniz Araçları, Tekne, Yat, Bot)
+    const isSea = (() => {
+      const cats = listing?.category_parents;
+      if (!Array.isArray(cats)) return false;
+      return cats.some((c) => {
+        const t = String(c?.title ?? '').toLowerCase();
+        const s = String(c?.slug ?? '').toLowerCase();
+        return t.includes('deniz') || s.includes('deniz') || t.includes('tekne') || s.includes('tekne') || t.includes('motoryat') || s.includes('yat') || t.includes('bot') || s.includes('bot');
+      });
+    })();
+    // Detect Tractor under Tarım Makineleri
+    const isTractor = (() => {
+      const cats = listing?.category_parents;
+      if (!Array.isArray(cats)) return false;
+      let sawTarim = false;
+      let sawTractor = false;
+      for (const c of cats) {
+        const t = String(c?.title ?? '').toLowerCase();
+        const s = String(c?.slug ?? '').toLowerCase();
+        if (t.includes('tarım') || t.includes('tarim') || s.includes('tarim')) sawTarim = true;
+        if (t.includes('trakt') || s.includes('trakt')) sawTractor = true;
+      }
+      return sawTarim && sawTractor;
+    })();
 
     // Detect housing (konut)
     const isHousing = (() => {
@@ -315,6 +357,20 @@ export const Video = ({ listingId, variant = 'bireysel' }) => {
         const s = String(c?.slug ?? '').toLowerCase();
         return t.includes('konut') || s.includes('konut') || t.includes('emlak') || s.includes('emlak');
       });
+    })();
+    // Detect commercial shop (Emlak / İş Yeri / Dükkan & Mağaza)
+    const isCommercialShop = (() => {
+      const cats = listing?.category_parents;
+      if (!Array.isArray(cats)) return false;
+      let hasIsYeri = false;
+      let hasDukkanMagaza = false;
+      for (const c of cats) {
+        const t = String(c?.title ?? '').toLowerCase();
+        const s = String(c?.slug ?? '').toLowerCase();
+        if (t.includes('iş yeri') || t.includes('is yeri') || s.includes('is-yeri') || s.includes('isyeri')) hasIsYeri = true;
+        if (t.includes('dükkan') || t.includes('dukkan') || t.includes('mağaza') || t.includes('magaza') || s.includes('dukkan') || s.includes('magaza')) hasDukkanMagaza = true;
+      }
+      return hasDukkanMagaza && (hasIsYeri || isHousing);
     })();
 
     // Detect land (toprak / arsa / tarla / arazi)
@@ -381,6 +437,9 @@ export const Video = ({ listingId, variant = 'bireysel' }) => {
     })();
     const odaAttr = getAttrAny(['Oda Sayısı', 'Oda Sayisi', 'Oda']);
     const odaText = val(odaAttr);
+    // Building age for commercial properties
+    const binaYasiAttr = getAttrAny(['Bina Yaşı', 'Bina Yasi', 'Binanın Yaşı', 'Binanin Yasi', 'Bina Yaşı (Yıl)', 'Bina Yasi (Yil)']);
+    const binaYasiVal = val(binaYasiAttr);
 
     const isitmaAttr = getAttrAny(['Isıtma', 'Isitma']);
     const isitmaText = val(isitmaAttr);
@@ -406,6 +465,8 @@ export const Video = ({ listingId, variant = 'bireysel' }) => {
     const otoparkVal = val(otoparkAttr);
     const tapuAttr = getAttrAny(['Tapu', 'Tapu Durumu']);
     const tapuText = val(tapuAttr);
+    const krediAttr = getAttrAny(['Krediye Uygun', 'Krediye uygun', 'Krediye Uygunluk', 'Kredi Durumu', 'Krediye Uygun mu']);
+    const krediVal = val(krediAttr);
 
     let detailsForVehicle = null;
     if (isBus) {
@@ -437,6 +498,43 @@ export const Video = ({ listingId, variant = 'bireysel' }) => {
       truthy(asansorVal) ? 'Asansörlü' : (cepheDisplay || katPositionText),
       truthy(otoparkVal) ? 'Otopark Mevcut' : tapuText,
     ].filter(Boolean);
+    // Commercial shop details: first Tapu, second Krediye Uygun
+    const detailsForCommercial = [
+      tapuText,
+      (krediVal != null && String(krediVal).trim() ? `Krediye Uygun: ${String(krediVal).trim()}` : null),
+    ].filter(Boolean);
+    // Sea vehicles details (ordered)
+    const detailsForSea = (() => {
+      const items = [];
+      if (boyDisplay) items.push(`Boy: ${boyDisplay}`);
+      if (flybridgeVal != null && String(flybridgeVal).trim()) items.push(`Flybridge: ${flybridgeVal}`);
+      if (govdeVal != null && String(govdeVal).trim()) items.push(`Gövde Malzemesi: ${govdeVal}`);
+      if (motorVal != null) {
+        let m = String(motorVal).trim();
+        if (!/hp/i.test(m)) m = `${m} HP`; else m = m.replace(/\bhp\b/gi, 'HP');
+        items.push(`Motor Gücü: ${m}`);
+      }
+      return items.filter(Boolean);
+    })();
+    // Tractor-specific details (ordered)
+    const detailsForTractor = (() => {
+      const items = [];
+      // 1) Plain Vites value (no label)
+      if (vitesText != null && String(vitesText).trim()) items.push(String(vitesText).trim());
+      if (kabinVal != null && String(kabinVal).trim()) items.push(`Kabin: ${kabinVal}`);
+      if (silindirText != null && String(silindirText).trim()) items.push(`Silindir Sayısı: ${silindirText}`);
+      if (motorVal != null) {
+        let m = String(motorVal).trim();
+        if (!/hp/i.test(m)) {
+          // append HP if missing
+          m = `${m} HP`;
+        } else {
+          m = m.replace(/\bhp\b/gi, 'HP');
+        }
+        items.push(`Motor Gücü: ${m}`);
+      }
+      return items.filter(Boolean);
+    })();
 
     // Land-specific attributes and mapping
     const alanAttr = getAttrAny(['Arsa Alanı', 'Alan', 'Metrekare', 'm2', 'm²', 'Parsel']);
@@ -455,6 +553,11 @@ export const Video = ({ listingId, variant = 'bireysel' }) => {
     const gabariVal = val(gabariAttr);
     const emsalAttr = getAttrAny(['Emsal', 'Kaks']);
     const emsalVal = val(emsalAttr);
+    // Land identifiers
+    const adaAttr = getAttrAny(['Ada', 'Ada No', 'Ada Numarası', 'Ada Numarasi']);
+    const parselAttr = getAttrAny(['Parsel', 'Parsel No', 'Parsel Numarası', 'Parsel Numarasi']);
+    const adaVal = val(adaAttr);
+    const parselVal = val(parselAttr);
     // Land type from categories or attributes
     const landType = (() => {
       const text = [
@@ -470,21 +573,36 @@ export const Video = ({ listingId, variant = 'bireysel' }) => {
     const detailsForLand = [
       imarVal != null ? `İmar Durumu: ${imarVal}` : null,
       gabariVal != null ? `Gabari: ${gabariVal}` : null,
-      emsalVal != null ? `Emsal: ${emsalVal}` : null,
-      tapuText,
+      (adaVal != null && String(adaVal).trim() ? `Ada No: ${String(adaVal).trim()}` : null),
+      (parselVal != null && String(parselVal).trim() ? `Parsel No: ${String(parselVal).trim()}` : null),
+      (tapuText != null && String(tapuText).trim() ? `Tapu Durumu: ${String(tapuText).trim()}` : null),
     ].filter(Boolean);
 
     return {
       chips: isLand
         ? [m2Text, m2FiyatiText, landType].filter(Boolean)
+        : isCommercialShop
+          ? [
+              brutM2Text,
+              (binaYasiVal != null && String(binaYasiVal).trim() ? String(binaYasiVal).trim() : null),
+              (odaText != null && String(odaText).trim() ? `${String(odaText).trim()} Oda` : null),
+            ].filter(Boolean)
         : isHousing
           ? [brutM2Text, formattedKatText, odaText].filter(Boolean)
-          : [kmText, modelText, vitesText].filter(Boolean),
+          : isSea
+            ? [modelText, motorMarkasiVal, yakitText].filter(Boolean)
+            : isTractor
+            ? [modelText, tipiText, cekisText].filter(Boolean)
+            : [kmText, modelText, vitesText].filter(Boolean),
       detailItems: isLand
         ? detailsForLand
         : isMotorcycle
           ? detailsForMotorcycle
-          : (isHousing ? detailsForHousing : detailsForVehicle),
+          : isSea
+            ? detailsForSea
+            : isTractor
+            ? detailsForTractor
+          : (isCommercialShop ? detailsForCommercial : (isHousing ? detailsForHousing : detailsForVehicle)),
       ilanNo: listing?.listing_number ?? null,
     };
   }, [listing]);
