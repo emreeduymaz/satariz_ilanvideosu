@@ -112,6 +112,7 @@ async function handleRender(req, res) {
 
 	let logs = '';
 	let outputPath = null;
+	let s3Url = null;
 	child.stdout.setEncoding('utf8');
 	child.stdout.on('data', (chunk) => {
 		logs += chunk;
@@ -120,6 +121,10 @@ async function handleRender(req, res) {
 			const m = line.match(/^::OUTPUT::(.+)$/);
 			if (m) {
 				outputPath = m[1].trim();
+			}
+			const m2 = line.match(/^::S3_URL::(.+)$/);
+			if (m2) {
+				s3Url = m2[1].trim();
 			}
 		}
 	});
@@ -133,7 +138,7 @@ async function handleRender(req, res) {
 		if (!responded) {
 			responded = true;
 			if (code === 0) {
-				return sendJson(res, 200, { ok: true, output: outputPath, listingId, variant });
+				return sendJson(res, 200, { ok: true, output: outputPath, s3Url, listingId, variant });
 			}
 			return sendJson(res, 500, { ok: false, error: 'pipeline_failed', code, logs });
 		}
