@@ -139,6 +139,49 @@ async function main() {
 
   console.log('✅ Render tamamlandı:', outFile);
 
+  // 4.2) Optional: Upload to S3 if configured
+  try {
+    const bucket = process.env.S3_BUCKET && String(process.env.S3_BUCKET).trim();
+    if (bucket) {
+      const region = String(process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || '').trim() || undefined;
+      const prefixRaw = String(process.env.S3_PREFIX || '').trim();
+      const prefix = prefixRaw ? prefixRaw.replace(/^\/+|\/+$/g, '') + '/' : '';
+      const key = prefix + path.basename(outFile);
+      const ext = path.extname(outFile).toLowerCase();
+      const contentType = ext === '.mp4' ? 'video/mp4' : ext === '.mov' ? 'video/quicktime' : 'application/octet-stream';
+      console.log('☁️  S3 upload başlıyor... s3://%s/%s', bucket, key);
+      let S3Client, PutObjectCommand;
+      try {
+        ({ S3Client, PutObjectCommand } = await import('@aws-sdk/client-s3'));
+      } catch (e) {
+        console.warn('⚠️ @aws-sdk/client-s3 bulunamadı. Yüklemek için: npm i -D @aws-sdk/client-s3');
+        throw e;
+      }
+      const s3 = new S3Client({ region });
+      const bodyStream = await fsp.readFile(outFile);
+      const put = new PutObjectCommand({
+        Bucket: bucket,
+        Key: key,
+        Body: bodyStream,
+        ContentType: contentType,
+        ACL: process.env.S3_ACL || undefined, // örn: 'public-read' (opsiyonel, önerilmez)
+        CacheControl: process.env.S3_CACHE || 'public, max-age=31536000, immutable',
+      });
+      await s3.send(put);
+      const publicBase = (() => {
+        const cf = String(process.env.CLOUDFRONT_DOMAIN || '').trim();
+        if (cf) return `https://${cf.replace(/^https?:\/\//, '').replace(/\/+$/, '')}`;
+        if (region) return `https://${bucket}.s3.${region}.amazonaws.com`;
+        return `https://${bucket}.s3.amazonaws.com`;
+      })();
+      const publicUrl = `${publicBase}/${key}`;
+      console.log('✅ S3 upload tamam: %s', publicUrl);
+      try { console.log('::S3_URL::%s', publicUrl); } catch {}
+    }
+  } catch (e) {
+    console.warn('⚠️ S3 upload adımı başarısız veya atlandı:', e?.message || e);
+  }
+
   // İsteğe bağlı: Preview'ı sonlandır (robust on Linux)
   try {
     const killPreview = async () => {
